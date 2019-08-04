@@ -7,4 +7,6 @@
 #sleep  30
 #sudo python3 /home/pi/.ovpns/ovpn_reg.py&
 #sudo ping -i 20 10.8.0.1 &
+sudo reboot
+
 
