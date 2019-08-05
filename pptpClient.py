@@ -49,7 +49,7 @@ def RestartVPN():
     #        print('已杀死pid为%s的进程,　返回值是:%s' % (pid, a))
     #time.sleep(10)
     os.system('sudo poff pptpconf')
-    time.sleep(1)
+    time.sleep(3)
     os.system('sudo pon pptpconf')
     #time.sleep(10)
 
@@ -277,33 +277,42 @@ def RegOnline(port1, _type):
     sqlMsg = "{},{},{},{},".format(_type, mac, user, ip)
     sendStr = "register_vpn<>" + str(sqlMsg)
     print('send str,', sendStr)
-
+    writeLog('send str,' + sendStr)
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((host, port1))
         client.send(sendStr.encode('utf8'))
         client.close()
+        writeLog("Socket Send finished")
         ret = 1
     except Exception as e:
+        writeLog("server is not reached")
         print("server is not reached")
         pass
 
     return ret
 
-print(get_mac_address())
-print(get_user_name())
+#print(get_mac_address())
+#print(get_user_name())
+def writeLog(data):
+    tmpFile  = '/home/pi/tmplog.conf'
+    with open(tmpFile, 'a+') as f:
+        f.write(data)
+        f.write('\n')
 
 if __name__ == "__main__":
     port = 1795
+    tmpFile  = '/home/pi/tmp.conf'
+    writeLog('pptpClient started')
     time.sleep(30)
-
+    writeLog('sleep 30')
     RegOnline(port, 0)
     serverErrCnt = 0
     dnsUpdate = 0
     append1 = 'nameserver 114.114.114.114'
     append2 = 'nameserver 8.8.8.8'
     while True:
-        time.sleep(30)
+        time.sleep(90)
         ret = RegOnline(port, 1)
         if ret == 0:
             serverErrCnt = serverErrCnt + 1
@@ -334,7 +343,7 @@ if __name__ == "__main__":
         if serverErrCnt > 5:
             serverErrCnt = 0
             # reset vpn connection
-            #print('openvpn reset')
+            print('openvpn reset')
             RestartVPN()
             dnsUpdate = 0
 
